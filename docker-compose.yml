@@ -6,6 +6,8 @@ services:
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: chorizo
+    volumes:
+      - ./init-mysql:/docker-entrypoint-initdb.d
     container_name: chorizo-with-mustard-db
 
   chorizo-with-mustard-api:
@@ -13,8 +15,8 @@ services:
       context: .
       dockerfile: Dockerfile
     tty: true
-    volumes:
-      - ./api:/chorizo-with-mustard-api
+      #    volumes:
+      #      - ./api:/chorizo-with-mustard-api
     ports:
       - "8000:8000"
     depends_on:

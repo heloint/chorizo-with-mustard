@@ -22,7 +22,8 @@ func main() {
     r.GET("/ping", func(c *gin.Context) {
       c.JSON(http.StatusOK, users)
     })
-    r.POST("/login", authentication.DoLogin)
+    r.POST("/login", authentication.DoLoginUser)
+    r.POST("/register", authentication.DoRegisterUser)
     r.Run("0.0.0.0:8000")
 
 }

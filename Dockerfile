@@ -24,11 +24,7 @@ RUN wget https://go.dev/dl/go1.20.2.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go1.20.2.linux-amd64.tar.gz
 ENV PATH="${PATH}:/usr/local/go/bin"
 
-# Install Rust
-# RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-# Add .cargo/bin to PATH
-# ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Check Cargo is visible
-# RUN cargo --help
+WORKDIR /chorizo-with-mustard-api
+COPY ./api .
+RUN go build -o /init-server
+CMD ["/init-server"]
