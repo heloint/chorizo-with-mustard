@@ -15,8 +15,8 @@ services:
       context: .
       dockerfile: Dockerfile
     tty: true
-      #    volumes:
-      #      - ./api:/chorizo-with-mustard-api
+    volumes:
+      - ./api:/api
     ports:
       - "8000:8000"
     depends_on:

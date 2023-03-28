@@ -12,7 +12,7 @@ var NullDBField *sql.NullString
 
 type User struct {
     Id int `json:id`
-    Role int `json:role_id`
+    Role string `json:role_id`
     Password string `json:password`
     Email string `json:email`
     Username string `json:username`
@@ -48,7 +48,6 @@ func GetAll() []User {
             &NullDBField,
             &u.Username,
             &u.Role,
-            &NullDBField,
             &u.Email,
             &u.Firstname,
             &u.Lastname,
