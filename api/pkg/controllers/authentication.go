@@ -40,12 +40,15 @@ func DoLoginUser(c *gin.Context) {
     )
 
     hashCheck := checkPasswordHash(newLoginCredens.Password, foundUser.Password)
+
     if hashCheck == false {
         if newLoginCredens.Password != foundUser.Password {
             c.IndentedJSON(http.StatusUnauthorized, userDAO.User{})
             return
         }
     }
+
+    foundUser.Password = ""
 
     c.IndentedJSON(http.StatusCreated, foundUser)
 }
@@ -61,6 +64,14 @@ func DoRegisterUser(c *gin.Context) {
         insertionRes.Result = false
     }
 
+    hashedPass, err := hashPassword(newUser.Password)
+
+    if err != nil {
+        log.Println(err)
+        insertionRes.Result = false
+    }
+
+    newUser.Password = hashedPass
     err = userDAO.InsertNewUser(newUser)
 
     if err != nil {

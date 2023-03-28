@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS users (
                                 id INT(10) PRIMARY KEY DEFAULT NEXT VALUE FOR user_id,
                                 username VARCHAR(25) NOT NULL CHECK(username <> ''),
                                 role_id INT(10) NOT NULL  DEFAULT 2 CHECK(role_id <> 0),
-                                password VARCHAR(25) NOT NULL CHECK(password <> ''),
+                                password VARCHAR(150) NOT NULL CHECK(password <> ''),
                                 email VARCHAR(30) NOT NULL CHECK(email <> ''),
                                 first_name VARCHAR(50) NOT NULL CHECK(first_name <> ''),
                                 last_name VARCHAR(60) NOT NULL CHECK(last_name <> ''),

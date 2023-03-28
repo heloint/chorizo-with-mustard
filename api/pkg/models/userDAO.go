@@ -68,14 +68,17 @@ func GetAll() []User {
 
 func GetByUsername(username string) User {
 
-    var foundUser User
     var err error
+    var foundUser User
 
     result := config.DB.QueryRow(
         `SELECT 
-        *
-        FROM users
-        WHERE username=?;`, username);
+        U.id, U.username, R.role_name, U.password, U.email, U.first_name, last_name, registration_date
+        FROM users as U
+        JOIN roles as R
+        ON (U.role_id=R.role_id)
+        WHERE username=?;`, username,
+    );
 
     // The result object provided Scan  method
     // to read row data, Scan returns error,
