@@ -12,7 +12,7 @@ var NullDBField *sql.NullString
 
 type User struct {
     Id int `json:id`
-    Role string `json:role_id`
+    Role string `json:role`
     Password string `json:password`
     Email string `json:email`
     Username string `json:username`
@@ -20,6 +20,7 @@ type User struct {
     Lastname string `json:lastname`
     RegistrationDate string `json:registrationDate`
 }
+
 
 func GetAll() []User {
 
@@ -65,7 +66,7 @@ func GetAll() []User {
     return resultSlice
 }
 
-func GetByUsernameAndPassword(username string, password string) User {
+func GetByUsername(username string) User {
 
     var foundUser User
     var err error
@@ -74,7 +75,7 @@ func GetByUsernameAndPassword(username string, password string) User {
         `SELECT 
         *
         FROM users
-        WHERE username=? and password=?;`, username, password);
+        WHERE username=?;`, username);
 
     // The result object provided Scan  method
     // to read row data, Scan returns error,
@@ -83,7 +84,7 @@ func GetByUsernameAndPassword(username string, password string) User {
         &NullDBField,
         &foundUser.Username,
         &foundUser.Role,
-        &NullDBField,
+        &foundUser.Password,
         &foundUser.Email,
         &foundUser.Firstname,
         &foundUser.Lastname,
