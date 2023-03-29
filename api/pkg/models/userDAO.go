@@ -2,10 +2,10 @@ package userDAO
 
 import (
     "log"
-    "errors"
-    "database/sql"
-    "api/pkg/config"
-    _"github.com/gin-gonic/gin"
+	"api/pkg/config"
+	"database/sql"
+	"errors"
+	_"github.com/gin-gonic/gin"
 )
 
 var NullDBField *sql.NullString
