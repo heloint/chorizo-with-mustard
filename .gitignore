@@ -36,6 +36,7 @@
 # typescript
 /app/*.tsbuildinfo
 /app/next-env.d.ts
+/app/.vscode
 
 # API-GOLANG/GIN
 # =========

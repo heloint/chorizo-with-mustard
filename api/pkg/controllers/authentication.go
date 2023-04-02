@@ -1,12 +1,21 @@
 package authentication
 
 import (
-    "log"
-    "net/http"
-    "api/pkg/models"
-    "github.com/gin-gonic/gin"
-    "golang.org/x/crypto/bcrypt"
+	userDAO "api/pkg/models"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 )
+
+type customClaim struct {
+    jwt string `json:jwt`
+    jwt.RegisteredClaims
+}
 
 type loginCredens struct {
     Username string `json:username`
@@ -27,17 +36,55 @@ func checkPasswordHash(password string, hash string) bool {
     return err == nil
 }
 
-func DoLoginUser(c *gin.Context) {
-    var newLoginCredens loginCredens
 
-    // Call BindJSON to bind the received JSON to newLoginCredens.
-    if err := c.BindJSON(&newLoginCredens); err != nil {
-        return
+func setJWTCookie(context *gin.Context, user userDAO.User) error {
+
+    claims := customClaim {
+        "jwt",
+        jwt.RegisteredClaims{
+            Issuer: strconv.Itoa(user.Id),
+            ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+        },
+    }
+    
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    ss, err := token.SignedString([]byte("supersecretkey"))
+
+    if err != nil {
+        return err
     }
 
-    var foundUser userDAO.User = userDAO.GetByUsername (
+    cookie := http.Cookie {
+        Name:"jwt",
+        Value: ss,
+        Path:"/",
+        Expires: time.Now().Add(time.Hour * 24),
+        HttpOnly: true,
+    }
+
+    http.SetCookie(context.Writer, &cookie)
+
+    return nil
+}
+
+
+func DoLoginUser(c *gin.Context) {
+    var newLoginCredens loginCredens
+    var foundUser userDAO.User
+    var err error
+
+    // Call BindJSON to bind the received JSON to newLoginCredens.
+    if err = c.BindJSON(&newLoginCredens); err != nil {
+        return
+    }
+    foundUser, err = userDAO.GetByUsername (
         newLoginCredens.Username,
     )
+
+    if err != nil {
+        c.IndentedJSON(http.StatusUnauthorized, userDAO.User{})
+        return
+    }
 
     hashCheck := checkPasswordHash(newLoginCredens.Password, foundUser.Password)
 
@@ -49,6 +96,13 @@ func DoLoginUser(c *gin.Context) {
     }
 
     foundUser.Password = ""
+
+    err = setJWTCookie(c, foundUser)
+
+    if err != nil {
+        c.IndentedJSON(http.StatusUnauthorized, userDAO.User{})
+        return
+    }
 
     c.IndentedJSON(http.StatusCreated, foundUser)
 }

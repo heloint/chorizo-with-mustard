@@ -1,11 +1,12 @@
 package userDAO
 
 import (
-    "log"
 	"api/pkg/config"
 	"database/sql"
 	"errors"
-	_"github.com/gin-gonic/gin"
+	"log"
+
+	_ "github.com/gin-gonic/gin"
 )
 
 var NullDBField *sql.NullString
@@ -66,7 +67,7 @@ func GetAll() []User {
     return resultSlice
 }
 
-func GetByUsername(username string) User {
+func GetByUsername(username string) (User, error) {
 
     var err error
     var foundUser User
@@ -77,7 +78,7 @@ func GetByUsername(username string) User {
         FROM users as U
         JOIN roles as R
         ON (U.role_id=R.role_id)
-        WHERE username=?;`, username,
+        WHERE U.username=?;`, username,
     );
 
     // The result object provided Scan  method
@@ -95,11 +96,11 @@ func GetByUsername(username string) User {
     )
 
     // handle error
-    if err != nil {
-        log.Println(err)
+    if err != nil && err != sql.ErrNoRows {
+        return User{}, err
     }    
 
-    return foundUser
+    return foundUser, nil
 }
 
 func InsertNewUser(newUser User) error {
