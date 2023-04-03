@@ -29,11 +29,12 @@ export default function Login() {
 
   return (
     <div id="Login" className="container">
-      <div className="row justify-content-center">
+      <div className="row justify-content-center my-5">
         <div className="col-xl-6 col-lg-6 col-md-10 d-grid gap-2">
-            <form onSubmit={submit}>
+            <h3>Login</h3>
+            <form onSubmit={submit} className="d-grid gap-3">
                 <div className="form-group">
-                  <label htmlFor="login-username" className="form-label mt-4">
+                  <label htmlFor="login-username" className="form-label">
                     Username
                   </label>
                   <input
@@ -47,7 +48,7 @@ export default function Login() {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="login-pass" className="form-label mt-4">
+                  <label htmlFor="login-pass" className="form-label">
                     Password
                   </label>
                   <input
@@ -59,9 +60,12 @@ export default function Login() {
                     onChange={e => setPassword(e.target.value)}
                   />
                 </div>
-                <button type="submit" className="btn btn-primary">
-                  Login
-                </button>
+                <div className="form-group">
+                    <button type="submit" className="btn btn-primary">
+                        Login
+                    </button>
+                </div>
+                
             </form>
 
         </div>

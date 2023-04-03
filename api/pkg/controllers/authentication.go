@@ -131,6 +131,8 @@ func DoRegisterUser(c *gin.Context) {
     if err != nil {
         log.Println(err)
         insertionRes.Result = false
+        c.IndentedJSON(http.StatusConflict, insertionRes)
+        return
     }
 
     c.IndentedJSON(http.StatusCreated, insertionRes)
