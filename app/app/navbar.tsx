@@ -1,17 +1,7 @@
 import Link from "next/link";
 import { cookies } from 'next/headers';
 
-export async function getServerSideProps(context: any) {
-  const cookies = context.req.headers.cookie['jwt'];
-  console.log(cookies);
-  return {
-    props: {},
-  };
-}
-
-export default function Navbar() {
-    const cookieStore = cookies();
-    console.log(cookieStore.getAll());
+export default function Navbar({user}: any) {
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
             <div className="container-fluid">
@@ -27,6 +17,17 @@ export default function Navbar() {
                         <li className="nav-item">
                             <Link href="/register" className="nav-link" >Register</Link>
                         </li>
+                        { 
+                            user.Result
+                            ? 
+                            <li className="nav-item">
+                                <Link href="/register" className="nav-link" >LALA</Link>
+                            </li>
+                            :
+                            <li className="nav-item">
+                                <Link href="/register" className="nav-link" >LILI</Link>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

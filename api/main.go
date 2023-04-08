@@ -44,5 +44,6 @@ func main() {
     r.Use(CORSMiddleware())
     r.POST("/login", authentication.DoLoginUser)
     r.POST("/register", authentication.DoRegisterUser)
+    r.GET("/profile", authentication.DoUserProfile)
     r.Run("0.0.0.0:8000")
 }

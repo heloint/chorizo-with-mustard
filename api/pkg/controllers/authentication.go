@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,11 @@ type confirmationRes struct {
     Result bool `json:result`
 }
 
+type sessionAuth struct {
+    IsLoggedIn bool `json:isLoggedIn`
+    User userDAO.User `json:user`
+}
+
 func hashPassword(password string) (string, error) {
     bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
     return string(bytes), err
@@ -36,9 +42,7 @@ func checkPasswordHash(password string, hash string) bool {
     return err == nil
 }
 
-
 func setJWTCookie(context *gin.Context, user userDAO.User) error {
-
     claims := customClaim {
         "jwt",
         jwt.RegisteredClaims{
@@ -137,3 +141,48 @@ func DoRegisterUser(c *gin.Context) {
 
     c.IndentedJSON(http.StatusCreated, insertionRes)
 }
+
+func DoUserProfile(c *gin.Context) {
+    authToken := ""
+    insertionRes := sessionAuth { 
+        IsLoggedIn: false,
+        User: userDAO.User {},
+    }
+
+    if val, ok := c.Request.Header["Authorization"]; ok {
+        authToken = strings.Split(val[0], " ")[1]
+    }
+
+    claims := jwt.MapClaims{}
+    token, err := jwt.ParseWithClaims(authToken, claims, func(token *jwt.Token) (interface{}, error) {
+        return []byte("supersecretkey"), nil
+    })
+
+    if err != nil || !token.Valid {
+        c.IndentedJSON(http.StatusUnauthorized, insertionRes)
+        return
+    }
+    userIDAsStr, err := claims.GetIssuer()
+
+    if err != nil {
+        c.IndentedJSON(http.StatusInternalServerError, insertionRes)
+        return
+    }
+
+    userID, err := strconv.Atoi(userIDAsStr)
+
+    if err != nil {
+        c.IndentedJSON(http.StatusInternalServerError, insertionRes)
+        return
+    }
+
+    user, err := userDAO.GetByID(userID)
+
+    insertionRes = sessionAuth { 
+        IsLoggedIn: false,
+        User: user,
+    }
+
+    c.IndentedJSON(http.StatusCreated, insertionRes)
+}
+

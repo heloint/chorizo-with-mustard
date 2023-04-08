@@ -2,6 +2,7 @@
 
 import { SyntheticEvent, useState } from "react";
 
+
 export default function Register() {
 
     const usernameField: HTMLInputElement = document.querySelector("#register-username") as HTMLInputElement;

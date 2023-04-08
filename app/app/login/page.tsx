@@ -18,7 +18,21 @@ type InputProps = {
 }
 
 export default function Login() {
-    const onSubmit: SubmitHandler<LoginFormInputs> = (data) => console.log(data);
+    const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
+        console.log(data);
+        fetch('http://localhost:8000/login', {
+            method: "POST",
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "text/plain"
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                username: data.username,
+                password: data.password
+            })
+        });
+    };
     const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
 
     // const submit = (e: SyntheticEvent) => {

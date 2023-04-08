@@ -67,6 +67,42 @@ func GetAll() []User {
     return resultSlice
 }
 
+func GetByID(ID int) (User, error) {
+
+    var err error
+    var foundUser User
+
+    result := config.DB.QueryRow(
+        `SELECT 
+        U.id, U.username, R.role_name, U.password, U.email, U.first_name, last_name, registration_date
+        FROM users as U
+        JOIN roles as R
+        ON (U.role_id=R.role_id)
+        WHERE U.id=?;`, ID,
+    );
+
+    // The result object provided Scan  method
+    // to read row data, Scan returns error,
+    // if any. Here we read id and name returned.
+    err = result.Scan(
+        &foundUser.Id,
+        &foundUser.Username,
+        &foundUser.Role,
+        &foundUser.Password,
+        &foundUser.Email,
+        &foundUser.Firstname,
+        &foundUser.Lastname,
+        &foundUser.RegistrationDate,
+    )
+
+    // handle error
+    if err != nil && err != sql.ErrNoRows {
+        return User{}, err
+    }    
+
+    return foundUser, nil
+}
+
 func GetByUsername(username string) (User, error) {
 
     var err error
@@ -85,7 +121,7 @@ func GetByUsername(username string) (User, error) {
     // to read row data, Scan returns error,
     // if any. Here we read id and name returned.
     err = result.Scan(
-        &NullDBField,
+        &foundUser.Id,
         &foundUser.Username,
         &foundUser.Role,
         &foundUser.Password,
