@@ -2,21 +2,16 @@ package authentication
 
 import (
 	userDAO "api/pkg/models"
+	"api/pkg/jwtAuth"
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
-	"time"
-
+    
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type customClaim struct {
-    jwt string `json:jwt`
-    jwt.RegisteredClaims
-}
 
 type loginCredens struct {
     Username string `json:username`
@@ -42,34 +37,6 @@ func checkPasswordHash(password string, hash string) bool {
     return err == nil
 }
 
-func setJWTCookie(context *gin.Context, user userDAO.User) error {
-    claims := customClaim {
-        "jwt",
-        jwt.RegisteredClaims{
-            Issuer: strconv.Itoa(user.Id),
-            ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-        },
-    }
-    
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    ss, err := token.SignedString([]byte("supersecretkey"))
-
-    if err != nil {
-        return err
-    }
-
-    cookie := http.Cookie {
-        Name:"jwt",
-        Value: ss,
-        Path:"/",
-        Expires: time.Now().Add(time.Hour * 24),
-        HttpOnly: true,
-    }
-
-    http.SetCookie(context.Writer, &cookie)
-
-    return nil
-}
 
 
 func DoLoginUser(c *gin.Context) {
@@ -101,7 +68,7 @@ func DoLoginUser(c *gin.Context) {
 
     foundUser.Password = ""
 
-    err = setJWTCookie(c, foundUser)
+    err = jwtAuth.SetJWTCookie(c, foundUser)
 
     if err != nil {
         c.IndentedJSON(http.StatusUnauthorized, userDAO.User{})
@@ -142,23 +109,25 @@ func DoRegisterUser(c *gin.Context) {
     c.IndentedJSON(http.StatusCreated, insertionRes)
 }
 
+
 func DoUserProfile(c *gin.Context) {
+    var err error
+    var authToken string
 
     profileRes := sessionAuth { 
         IsLoggedIn: false,
         User: userDAO.User {},
     }
 
-    // func validateAuthHeader
-    // =======================================
-    authToken := ""
+    authToken, err = jwtAuth.ExtractJWTToken(c)
 
-    // Get auth token
-    if val, ok := c.Request.Header["Authorization"]; ok {
-        authToken = strings.Split(val[0], " ")[1]
+    if err != nil {
+        c.IndentedJSON(http.StatusUnauthorized, profileRes)
+        return
     }
 
-    // Get auth token
+    // Get 
+    // =======================================
     claims := jwt.MapClaims{}
     token, err := jwt.ParseWithClaims(authToken, claims, func(token *jwt.Token) (interface{}, error) {
         return []byte("supersecretkey"), nil
