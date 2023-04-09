@@ -143,46 +143,54 @@ func DoRegisterUser(c *gin.Context) {
 }
 
 func DoUserProfile(c *gin.Context) {
-    authToken := ""
-    insertionRes := sessionAuth { 
+
+    profileRes := sessionAuth { 
         IsLoggedIn: false,
         User: userDAO.User {},
     }
 
+    // func validateAuthHeader
+    // =======================================
+    authToken := ""
+
+    // Get auth token
     if val, ok := c.Request.Header["Authorization"]; ok {
         authToken = strings.Split(val[0], " ")[1]
     }
 
+    // Get auth token
     claims := jwt.MapClaims{}
     token, err := jwt.ParseWithClaims(authToken, claims, func(token *jwt.Token) (interface{}, error) {
         return []byte("supersecretkey"), nil
     })
 
     if err != nil || !token.Valid {
-        c.IndentedJSON(http.StatusUnauthorized, insertionRes)
+        c.IndentedJSON(http.StatusUnauthorized, profileRes)
         return
     }
+    // =======================================
+
     userIDAsStr, err := claims.GetIssuer()
 
     if err != nil {
-        c.IndentedJSON(http.StatusInternalServerError, insertionRes)
+        c.IndentedJSON(http.StatusInternalServerError, profileRes)
         return
     }
 
     userID, err := strconv.Atoi(userIDAsStr)
 
     if err != nil {
-        c.IndentedJSON(http.StatusInternalServerError, insertionRes)
+        c.IndentedJSON(http.StatusInternalServerError, profileRes)
         return
     }
 
     user, err := userDAO.GetByID(userID)
 
-    insertionRes = sessionAuth { 
+    profileRes = sessionAuth { 
         IsLoggedIn: false,
         User: user,
     }
 
-    c.IndentedJSON(http.StatusCreated, insertionRes)
+    c.IndentedJSON(http.StatusCreated, profileRes)
 }
 

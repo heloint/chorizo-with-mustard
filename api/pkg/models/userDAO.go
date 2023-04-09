@@ -4,163 +4,161 @@ import (
 	"api/pkg/config"
 	"database/sql"
 	"errors"
-	"log"
-
 	_ "github.com/gin-gonic/gin"
+	_ "log"
 )
 
+// Used as a null placeholder for db row scans.
 var NullDBField *sql.NullString
 
 type User struct {
-    Id int `json:id`
-    Role string `json:role`
-    Password string `json:password`
-    Email string `json:email`
-    Username string `json:username`
-    Firstname string `json:firstname`
-    Lastname string `json:lastname`
-    RegistrationDate string `json:registrationDate`
+	Id               int    `json:id`
+	Role             string `json:role`
+	Password         string `json:password`
+	Email            string `json:email`
+	Username         string `json:username`
+	Firstname        string `json:firstname`
+	Lastname         string `json:lastname`
+	RegistrationDate string `json:registrationDate`
 }
 
+var generalSelectQuery string = `SELECT
+                                    U.id, U.role_name, U.password,
+                                    U.email, U.username, U.first_name,
+                                    U.last_name, U.registration_date
+                                FROM users as U
+                                JOIN roles as R
+                                ON (U.role_id=R.role_id)`
 
-func GetAll() []User {
+// Returns a slice of User objects scanned from *sql.Rows.
+func userSliceFromResult(rows *sql.Rows) ([]User, error) {
+	var err error
+	var resultSlice []User = []User{}
 
-    result, err := config.DB.Query(
-        `SELECT 
-        U.id, U.username, R.role_name, U.email, U.first_name, last_name, registration_date
-        FROM users as U
-        JOIN roles as R
-        ON (U.role_id=R.role_id)`);
+	for rows.Next() {
+		var user User
 
-    if err != nil {
-        panic(err)
-    }
-    
-    var resultSlice []User = []User{}
+		err = rows.Scan(
+			&user.Id,
+			&user.Role,
+			&user.Password,
+			&user.Email,
+			&user.Username,
+			&user.Firstname,
+			&user.Lastname,
+			&user.RegistrationDate,
+		)
 
-    // the result object has a method called Next,
-    // which is used to iterate through all returned rows.
-    for result.Next() {
-        var u User
+		// handle error
+		if err != nil {
+			return resultSlice, err
+		}
 
-        // The result object provided Scan  method
-        // to read row data, Scan returns error,
-        // if any. Here we read id and name returned.
-        err = result.Scan(
-            &NullDBField,
-            &u.Username,
-            &u.Role,
-            &u.Email,
-            &u.Firstname,
-            &u.Lastname,
-            &u.RegistrationDate,
-        )
+		resultSlice = append(resultSlice, user)
+	}
 
-        // handle error
-        if err != nil {
-            log.Println(err)
-        }    
-
-        resultSlice = append(resultSlice, u) 
-
-    }
-    return resultSlice
+	return resultSlice, nil
 }
 
+// Returns a single User object from *sql.Row.
+func userFromResult(row *sql.Row) (User, error) {
+	var err error
+	var user User
+	err = row.Scan(
+		&user.Id,
+		&user.Role,
+		&user.Password,
+		&user.Email,
+		&user.Username,
+		&user.Firstname,
+		&user.Lastname,
+		&user.RegistrationDate,
+	)
+
+	// handle error
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, nil
+}
+
+// Return a slice with all the users in the database.
+func GetAll() ([]User, error) {
+	var err error
+	var users []User
+
+	result, err := config.DB.Query(generalSelectQuery)
+
+	if err != nil {
+		return []User{}, err
+	}
+
+	users, err = userSliceFromResult(result)
+
+	if err != nil {
+		return users, err
+	}
+
+	return users, err
+
+}
+
+// Get the user corresponding to the given ID.
 func GetByID(ID int) (User, error) {
+	var err error
+	var foundUser User
 
-    var err error
-    var foundUser User
+	result := config.DB.QueryRow(generalSelectQuery+`WHERE U.id=?;`, ID)
 
-    result := config.DB.QueryRow(
-        `SELECT 
-        U.id, U.username, R.role_name, U.password, U.email, U.first_name, last_name, registration_date
-        FROM users as U
-        JOIN roles as R
-        ON (U.role_id=R.role_id)
-        WHERE U.id=?;`, ID,
-    );
+	foundUser, err = userFromResult(result)
 
-    // The result object provided Scan  method
-    // to read row data, Scan returns error,
-    // if any. Here we read id and name returned.
-    err = result.Scan(
-        &foundUser.Id,
-        &foundUser.Username,
-        &foundUser.Role,
-        &foundUser.Password,
-        &foundUser.Email,
-        &foundUser.Firstname,
-        &foundUser.Lastname,
-        &foundUser.RegistrationDate,
-    )
+	// handle error
+	if err != nil && err != sql.ErrNoRows {
+		return User{}, err
+	}
 
-    // handle error
-    if err != nil && err != sql.ErrNoRows {
-        return User{}, err
-    }    
-
-    return foundUser, nil
+	return foundUser, nil
 }
 
+// Get the user corresponding to the given username.
 func GetByUsername(username string) (User, error) {
+	var err error
+	var foundUser User
 
-    var err error
-    var foundUser User
+	result := config.DB.QueryRow(generalSelectQuery+`WHERE U.username=?;`, username)
 
-    result := config.DB.QueryRow(
-        `SELECT 
-        U.id, U.username, R.role_name, U.password, U.email, U.first_name, last_name, registration_date
-        FROM users as U
-        JOIN roles as R
-        ON (U.role_id=R.role_id)
-        WHERE U.username=?;`, username,
-    );
+	foundUser, err = userFromResult(result)
 
-    // The result object provided Scan  method
-    // to read row data, Scan returns error,
-    // if any. Here we read id and name returned.
-    err = result.Scan(
-        &foundUser.Id,
-        &foundUser.Username,
-        &foundUser.Role,
-        &foundUser.Password,
-        &foundUser.Email,
-        &foundUser.Firstname,
-        &foundUser.Lastname,
-        &foundUser.RegistrationDate,
-    )
+	if err != nil && err != sql.ErrNoRows {
+		return User{}, err
+	}
 
-    // handle error
-    if err != nil && err != sql.ErrNoRows {
-        return User{}, err
-    }    
-
-    return foundUser, nil
+	return foundUser, nil
 }
 
 func InsertNewUser(newUser User) error {
-    var err error
-    var res sql.Result
-    var affectedRowNum int64
+	var err error
+	var res sql.Result
+	var affectedRowNum int64
 
-    res, err = config.DB.Exec(
-        `INSERT INTO users (username,password,email,first_name,last_name) 
+	res, err = config.DB.Exec(
+		`INSERT INTO users (username,password,email,first_name,last_name) 
          VALUES (?,?,?,?,?)`,
-        newUser.Username, newUser.Password, newUser.Email, newUser.Firstname, newUser.Lastname,
-    )
+		newUser.Username, newUser.Password, newUser.Email, newUser.Firstname, newUser.Lastname,
+	)
 
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
-    affectedRowNum, err = res.RowsAffected()
+	affectedRowNum, err = res.RowsAffected()
 
-    if err != nil {
-        return err
-    } else if affectedRowNum < 1 {
-        return errors.New("No rows have been affected!")
-    }
+	if err != nil {
+		return err
+	} else if affectedRowNum < 1 {
+		return errors.New("No rows have been affected!")
+	}
 
-    return nil
+	return nil
 }
