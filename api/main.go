@@ -51,6 +51,7 @@ func main() {
 	r.POST("/login", authentication.DoLoginUser)
 	r.POST("/register", authentication.DoRegisterUser)
 	r.GET("/profile", authentication.DoUserProfile)
+	r.GET("/logout", authentication.DoLogout)
 
 	r.Run("0.0.0.0:8000")
 }

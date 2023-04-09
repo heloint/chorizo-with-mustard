@@ -1,7 +1,22 @@
 import Link from "next/link";
-import { cookies } from 'next/headers';
 
-export default function Navbar({user}: any) {
+type User = {
+    Id: number
+    Role: string
+    Password: string
+    Email: string
+    Username: string
+    Firstname: string
+    Lastname: string
+    RegistrationDate: string
+}
+
+type SessionVar = {
+    IsLoggedIn: boolean
+    User: User
+}
+
+export default function Navbar(session: SessionVar) {
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
             <div className="container-fluid">
@@ -11,18 +26,20 @@ export default function Navbar({user}: any) {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarColor01">
                     <ul className="navbar-nav me-auto">
-                        <li className="nav-item">
-                            <Link href="/login" className="nav-link" >Login</Link>
-                        </li>
+                        {
+                            session.IsLoggedIn ? null : 
+                            <li className="nav-item">
+                                <Link href="/login" className="nav-link" >Login</Link>
+                            </li>
+                        }
                         <li className="nav-item">
                             <Link href="/register" className="nav-link" >Register</Link>
                         </li>
-                        { 
-                            user.IsLoggedIn ? 
-                            <li className="nav-item">
-                                <Link href={`${process.env.GO_API}/logout`} className="nav-link" >Log out</Link>
-                            </li>
-                            : <p>fdsafdas</p>
+                        {
+                            session.IsLoggedIn ?
+                                <li className="nav-item">
+                                    <Link href="/logout" className="nav-link" >Log out</Link>
+                                </li> : null
                         }
                     </ul>
                 </div>

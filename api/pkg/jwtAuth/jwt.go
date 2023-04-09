@@ -78,3 +78,16 @@ func GetTokenClaims(authToken string) (jwt.MapClaims, error) {
 
 	return claims, nil
 }
+
+// Expires the jwt cookie on the client.
+func ExpireJWTCookie(context *gin.Context) {
+	cookie := http.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Now().Add(-time.Hour),
+		HttpOnly: true,
+	}
+
+	http.SetCookie(context.Writer, &cookie)
+}

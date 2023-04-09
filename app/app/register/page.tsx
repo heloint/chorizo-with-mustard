@@ -43,7 +43,6 @@ export default function Register() {
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
     const [successMessage, setSuccessMessage] = useState<string | undefined>();
     const setConflictMessage = (conflictError: string) => {
-            console.log(conflictError);
         switch (conflictError) {
             case "user_name_unique":
                 setErrorMessage('Username already exists!');
@@ -57,7 +56,6 @@ export default function Register() {
     }
 
     const onSubmit: SubmitHandler<RegisterFormInputs> = async (data) => {
-        console.log(data);
 
         const res = await fetch('http://localhost:8000/register', {
             method: "POST",

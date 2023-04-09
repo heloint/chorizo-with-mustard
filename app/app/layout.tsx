@@ -18,7 +18,6 @@ export default async function RootLayout({
 }) {
 
     const user = await GetUserProfile();
-    console.log('result from GetUserProfile', user);
 
     return (
         <html lang="en">
@@ -30,7 +29,7 @@ export default async function RootLayout({
                 crossOrigin="anonymous"
             />
             <body>
-                <Navbar user={user}/>
+                <Navbar {...user}/>
                 {children}
             </body>
         </html>

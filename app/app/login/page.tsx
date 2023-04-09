@@ -1,6 +1,7 @@
 'use client'
 
 import { useForm, SubmitHandler, UseFormRegister, Path } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 interface LoginFormInputs {
     username: string
@@ -17,26 +18,31 @@ type InputProps = {
     required: boolean;
 }
 
-const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
-    console.log(data);
-    fetch('http://localhost:8000/login', {
-        method: "POST",
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Content-Type": "text/plain"
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-            username: data.username,
-            password: data.password
-        })
-    });
-};
-
-
 export default function Login() {
-
+    const router = useRouter();
     const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
+
+    const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
+        const res = await fetch('http://localhost:8000/login', {
+            method: "POST",
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "text/plain"
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                username: data.username,
+                password: data.password
+            })
+        });
+
+        if (res.ok) {
+            // router.push('/');
+            // router.refresh();
+            window.location.href = '/';
+        }
+
+    };
 
     const Input = ({ label, type, id, fieldName, register, placeholder, required }: InputProps) => (
         <>
