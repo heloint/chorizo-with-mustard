@@ -8,49 +8,35 @@ interface LoginFormInputs {
 }
 
 type InputProps = {
-   label: string;
-   type: string;
-   id: string;
-   fieldName: Path<LoginFormInputs>;
-   register: UseFormRegister<LoginFormInputs>;
-   placeholder: string;
-   required: boolean;
+    label: string;
+    type: string;
+    id: string;
+    fieldName: Path<LoginFormInputs>;
+    register: UseFormRegister<LoginFormInputs>;
+    placeholder: string;
+    required: boolean;
 }
 
+const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
+    console.log(data);
+    fetch('http://localhost:8000/login', {
+        method: "POST",
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "text/plain"
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            username: data.username,
+            password: data.password
+        })
+    });
+};
+
+
 export default function Login() {
-    const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
-        console.log(data);
-        fetch('http://localhost:8000/login', {
-            method: "POST",
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Content-Type": "text/plain"
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                username: data.username,
-                password: data.password
-            })
-        });
-    };
+
     const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
-
-    // const submit = (e: SyntheticEvent) => {
-    //     e.preventDefault();
-
-    //     fetch('http://localhost:8000/login', {
-    //         method: "POST",
-    //         headers: {
-    //             "Access-Control-Allow-Origin": "*",
-    //             "Content-Type": "text/plain"
-    //         },
-    //         credentials: 'include',
-    //         body: JSON.stringify({
-    //             username: username,
-    //             password: password
-    //         })
-    //     });
-    // }
 
     const Input = ({ label, type, id, fieldName, register, placeholder, required }: InputProps) => (
         <>

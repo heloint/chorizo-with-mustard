@@ -18,15 +18,11 @@ export default function Navbar({user}: any) {
                             <Link href="/register" className="nav-link" >Register</Link>
                         </li>
                         { 
-                            user.Result
-                            ? 
+                            user.IsLoggedIn ? 
                             <li className="nav-item">
-                                <Link href="/register" className="nav-link" >LALA</Link>
+                                <Link href={`${process.env.GO_API}/logout`} className="nav-link" >Log out</Link>
                             </li>
-                            :
-                            <li className="nav-item">
-                                <Link href="/register" className="nav-link" >LILI</Link>
-                            </li>
+                            : <p>fdsafdas</p>
                         }
                     </ul>
                 </div>

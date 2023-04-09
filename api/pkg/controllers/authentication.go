@@ -1,27 +1,32 @@
 package authentication
 
 import (
-	userDAO "api/pkg/models"
 	"api/pkg/jwtAuth"
+	userDAO "api/pkg/models"
 	"log"
 	"net/http"
 	"strconv"
-    
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-
+// Received login credentials on request.
 type loginCredens struct {
     Username string `json:username`
     Password string `json:password`
 }
 
+// Confirmation result on registration.
 type confirmationRes struct {
     Result bool `json:result`
+    ConflictError string `json:conflictError`
 }
 
+// Verification if the user has valid JWT token,
+// and sending back the users data.
 type sessionAuth struct {
     IsLoggedIn bool `json:isLoggedIn`
     User userDAO.User `json:user`
@@ -36,8 +41,6 @@ func checkPasswordHash(password string, hash string) bool {
     err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
     return err == nil
 }
-
-
 
 func DoLoginUser(c *gin.Context) {
     var newLoginCredens loginCredens
@@ -81,7 +84,10 @@ func DoLoginUser(c *gin.Context) {
 func DoRegisterUser(c *gin.Context) {
     var err error
     var newUser userDAO.User
-    insertionRes := confirmationRes {Result: true}
+    insertionRes := confirmationRes {
+        Result: true,
+        ConflictError: "",
+    }
 
     // Call BindJSON to bind the received JSON to newLoginCredens.
     if err := c.BindJSON(&newUser); err != nil {
@@ -102,6 +108,8 @@ func DoRegisterUser(c *gin.Context) {
     if err != nil {
         log.Println(err)
         insertionRes.Result = false
+        errorSplit := strings.Split(err.Error(), " ")
+        insertionRes.ConflictError = strings.Trim(errorSplit[len(errorSplit)-1], "'")
         c.IndentedJSON(http.StatusConflict, insertionRes)
         return
     }
@@ -109,10 +117,10 @@ func DoRegisterUser(c *gin.Context) {
     c.IndentedJSON(http.StatusCreated, insertionRes)
 }
 
-
 func DoUserProfile(c *gin.Context) {
     var err error
     var authToken string
+    var claims jwt.MapClaims
 
     profileRes := sessionAuth { 
         IsLoggedIn: false,
@@ -126,18 +134,11 @@ func DoUserProfile(c *gin.Context) {
         return
     }
 
-    // Get 
-    // =======================================
-    claims := jwt.MapClaims{}
-    token, err := jwt.ParseWithClaims(authToken, claims, func(token *jwt.Token) (interface{}, error) {
-        return []byte("supersecretkey"), nil
-    })
+    claims, err = jwtAuth.GetTokenClaims(authToken)
 
-    if err != nil || !token.Valid {
+    if err != nil {
         c.IndentedJSON(http.StatusUnauthorized, profileRes)
-        return
     }
-    // =======================================
 
     userIDAsStr, err := claims.GetIssuer()
 
@@ -155,8 +156,10 @@ func DoUserProfile(c *gin.Context) {
 
     user, err := userDAO.GetByID(userID)
 
+    user.Password = ""
+
     profileRes = sessionAuth { 
-        IsLoggedIn: false,
+        IsLoggedIn: true,
         User: user,
     }
 

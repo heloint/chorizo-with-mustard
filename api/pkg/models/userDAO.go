@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	_ "github.com/gin-gonic/gin"
-	_ "log"
+	_"log"
 )
 
 // Used as a null placeholder for db row scans.
@@ -23,12 +23,12 @@ type User struct {
 }
 
 var generalSelectQuery string = `SELECT
-                                    U.id, U.role_name, U.password,
+                                    U.id, R.role_name, U.password,
                                     U.email, U.username, U.first_name,
                                     U.last_name, U.registration_date
                                 FROM users as U
                                 JOIN roles as R
-                                ON (U.role_id=R.role_id)`
+                                ON (U.role_id=R.role_id) `
 
 // Returns a slice of User objects scanned from *sql.Rows.
 func userSliceFromResult(rows *sql.Rows) ([]User, error) {
