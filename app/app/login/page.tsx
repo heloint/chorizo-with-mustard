@@ -1,7 +1,7 @@
 'use client'
 
 import { useForm, SubmitHandler, UseFormRegister, Path } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface LoginFormInputs {
     username: string
@@ -19,8 +19,8 @@ type InputProps = {
 }
 
 export default function Login() {
-    const router = useRouter();
     const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
+    const [errorMesssage, setErrorMessage] = useState<string | undefined>(undefined);
 
     const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
         const res = await fetch('http://localhost:8000/login', {
@@ -37,9 +37,10 @@ export default function Login() {
         });
 
         if (res.ok) {
-            // router.push('/');
-            // router.refresh();
+            setErrorMessage(undefined);
             window.location.href = '/';
+        } else {
+            setErrorMessage('Incorrect username or password.');
         }
 
     };
@@ -62,6 +63,11 @@ export default function Login() {
             <div className="row justify-content-center my-5">
                 <div className="col-xl-6 col-lg-6 col-md-10 d-grid gap-2">
                     <h3>Login</h3>
+                    {
+                        errorMesssage ?
+                        <h5 className="text-danger">{errorMesssage}</h5>
+                        : null
+                    }
                     <form onSubmit={handleSubmit(onSubmit)} className="d-grid gap-3">
                         <Input id="login-username"
                             label="Username"
