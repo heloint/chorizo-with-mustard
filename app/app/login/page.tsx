@@ -62,7 +62,7 @@ export default function Login() {
         <div id="Login" className="container">
             <div className="row justify-content-center my-5">
                 <div className="col-xl-6 col-lg-6 col-md-10 d-grid gap-2">
-                    <h3>Login</h3>
+                    <h4>Login</h4>
                     {
                         errorMesssage ?
                         <h5 className="text-danger">{errorMesssage}</h5>
