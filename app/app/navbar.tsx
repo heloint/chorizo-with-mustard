@@ -27,10 +27,10 @@ export default function Navbar(session: SessionVar) {
                 <div className="collapse navbar-collapse" id="navbarColor01">
                     <ul className="navbar-nav me-auto">
                         {
-                            session.IsLoggedIn ? null : 
-                            <li className="nav-item">
-                                <Link href="/login" className="nav-link" >Login</Link>
-                            </li>
+                            session.IsLoggedIn ? null :
+                                <li className="nav-item">
+                                    <Link href="/login" className="nav-link" >Login</Link>
+                                </li>
                         }
                         <li className="nav-item">
                             <Link href="/register" className="nav-link" >Register</Link>
