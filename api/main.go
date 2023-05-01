@@ -6,7 +6,7 @@ import (
 	_ "api/pkg/models"
 	_ "github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-    "log"
+    _"log"
 )
 
 // Set API headers
@@ -54,7 +54,6 @@ func main() {
 	r.GET("/profile", authentication.DoUserProfile)
 	r.GET("/logout", authentication.DoLogout)
 
-    // Dynamic routing example.
     /* r. GET("/user/:username", func (c *gin.Context) {
         username := c.Param("username")
         log.Println(username)
