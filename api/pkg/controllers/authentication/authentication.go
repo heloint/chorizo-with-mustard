@@ -169,5 +169,5 @@ func DoUserProfile(c *gin.Context) {
 // Logs the user out by expire the jwt cookie.
 func DoLogout(c *gin.Context) {
 	jwtAuth.ExpireJWTCookie(c)
-    c.IndentedJSON(http.StatusCreated, gin.H{"loggedOut": true})
+	c.IndentedJSON(http.StatusCreated, gin.H{"loggedOut": true})
 }

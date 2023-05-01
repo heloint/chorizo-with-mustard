@@ -2,7 +2,8 @@ package main
 
 import (
 	_ "api/pkg/apiLogs"
-	"api/pkg/controllers"
+	"api/pkg/controllers/authentication"
+	"api/pkg/controllers/downloads"
 	_ "api/pkg/models"
 	_ "github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -42,22 +43,23 @@ func main() {
 	// Start writing the SDTOUT & STDERR to log files.
 	// apiLogs.InitAPILogs()
 
-
-	r := gin.Default()
+	router := gin.Default()
 
     // Apply defined headers.
-	r.Use(CORSMiddleware())
+	router.Use(CORSMiddleware())
 
-    // Routes
-	r.POST("/login", authentication.DoLoginUser)
-	r.POST("/register", authentication.DoRegisterUser)
-	r.GET("/profile", authentication.DoUserProfile)
-	r.GET("/logout", authentication.DoLogout)
+	router.POST("/login", authentication.DoLoginUser)
+	router.POST("/register", authentication.DoRegisterUser)
+	router.GET("/profile", authentication.DoUserProfile)
+	router.GET("/logout", authentication.DoLogout)
+
+	router.GET("/downloads", downloads.ListAllFiles)
+    router.GET("/downloads/:file", downloads.DownloadFile)
 
     /* r. GET("/user/:username", func (c *gin.Context) {
         username := c.Param("username")
         log.Println(username)
     }) */
 
-	r.Run("0.0.0.0:8000")
+	router.Run("0.0.0.0:8000")
 }
