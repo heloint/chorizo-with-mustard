@@ -9,6 +9,8 @@ services:
     volumes:
       - ./init-mysql:/docker-entrypoint-initdb.d
     container_name: chorizo-with-mustard-db
+    networks:
+      - mustard-network
 
   chorizo-with-mustard-api:
     build:
@@ -22,3 +24,9 @@ services:
     depends_on:
       - chorizo-with-mustard-db
     container_name: chorizo-with-mustard-api
+    networks:
+      - mustard-network
+
+networks:
+  mustard-network:
+    driver: bridge
